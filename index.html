@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Location Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #61a3b6 0%, #2c5364 100%);
+            min-height: 100vh;
+        }
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Student Attendance Form</h1>
+            
+            <!-- Location Status -->
+            <div id="locationStatus" class="mb-6 text-center">
+                <i class="bi bi-geo-alt text-3xl text-blue-500"></i>
+                <p class="text-gray-600 mt-2">Fetching your location...</p>
+                <div class="loading inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+            </div>
+
+            <!-- Form -->
+            <form id="studentForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="rollNumber">
+                        Roll Number
+                    </label>
+                    <input type="text" id="rollNumber" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                        placeholder="Enter your roll number">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Email (Auto-detected)
+                    </label>
+                    <p id="userEmail" class="text-gray-600 px-3 py-2 border border-gray-300 rounded-md bg-gray-50"></p>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Location
+                    </label>
+                    <p id="locationDisplay" class="text-gray-600 px-3 py-2 border border-gray-300 rounded-md bg-gray-50"></p>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
+                    Submit
+                </button>
+            </form>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden text-center">
+                <i class="bi bi-check-circle text-5xl text-green-500"></i>
+                <p class="text-gray-700 mt-4">Form submitted successfully!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userLocation = null;
+        let userEmail = '';
+
+        // Function to get user's location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+                        document.getElementById('locationDisplay').textContent = 
+                            `Lat: ${userLocation.latitude.toFixed(4)}, Long: ${userLocation.longitude.toFixed(4)}`;
+                        document.getElementById('locationStatus').style.display = 'none';
+                        document.getElementById('studentForm').classList.remove('hidden');
+                    },
+                    error => {
+                        alert('Unable to retrieve your location. Please allow location access.');
+                        document.getElementById('locationStatus').innerHTML = 
+                            '<p class="text-red-500">Location access denied. Please enable location services.</p>';
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser');
+            }
+        }
+
+        // Check if user is logged into Google
+        function checkGoogleLogin() {
+            // In a real implementation, you would use Google OAuth here
+            // For demo purposes, we'll simulate it
+            userEmail = 'user@gmail.com'; // This would normally come from Google OAuth
+            document.getElementById('userEmail').textContent = userEmail;
+        }
+
+        // Handle form submission
+        document.getElementById('studentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                rollNumber: document.getElementById('rollNumber').value,
+                email: userEmail,
+                location: userLocation,
+                timestamp: new Date().toISOString()
+            };
+
+            // In a real implementation, you would send this data to Google Sheets
+            // through a backend service or Google Apps Script
+            console.log('Form submitted:', formData);
+
+            // Show success message
+            document.getElementById('studentForm').classList.add('hidden');
+            document.getElementById('successMessage').classList.remove('hidden');
+
+            // Reset form after 3 seconds
+            setTimeout(() => {
+                document.getElementById('studentForm').reset();
+                document.getElementById('successMessage').classList.add('hidden');
+                document.getElementById('studentForm').classList.remove('hidden');
+            }, 3000);
+        });
+
+        // Initialize
+        window.onload = () => {
+            getLocation();
+            checkGoogleLogin();
+        };
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
